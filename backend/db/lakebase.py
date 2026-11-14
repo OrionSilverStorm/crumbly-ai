@@ -45,8 +45,15 @@ def _conninfo() -> tuple[str, type[psycopg.Connection], float]:
         return settings.database_url, psycopg.Connection, 3600
     import pgserver  # embedded Postgres binaries, no Docker needed
 
-    server = pgserver.get_server(settings.pgdata, cleanup_mode=None)  # keep running across restarts
-    return server.get_uri(), psycopg.Connection, 3600
+    # Keep running across restarts. After an unclean stop, crash recovery on Windows can outlast pgserver's 10 s
+    # start timeout, so retry while the server finishes recovering.
+    for attempt in range(6):
+        try:
+            server = pgserver.get_server(settings.pgdata, cleanup_mode=None)
+            return server.get_uri(), psycopg.Connection, 3600
+        except Exception:
+            if attempt == 5:
+                raise
 
 
 @lru_cache

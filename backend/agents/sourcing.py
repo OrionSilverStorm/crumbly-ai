@@ -101,6 +101,12 @@ def research(inc: dict, lock) -> None:
         store.update_incident(inc["id"], state={"research_done": True, "new_suppliers": cards, "linkup_queries": lk.queries})
 
 
+def _plain(fields: list[str]) -> str:
+    """['delivery_charge', 'arrival_at'] -> 'delivery charge and arrival time'."""
+    names = [f.replace("_at", " time").replace("_", " ") for f in fields]
+    return " and ".join(names) if len(names) < 3 else ", ".join(names[:-1]) + " and " + names[-1]
+
+
 def _vat_default(ingredient: str) -> D | None:
     """Catalogue VAT for the ingredient (flour is zero-rated), used only when the supplier doesn't state VAT."""
     rates = {a["vat_rate"] for a in tools.approved_alternatives(ingredient)}
@@ -158,7 +164,8 @@ def handle_quote(inc: dict, thread: dict, mail: Mail) -> str:
     saved = sum(s["covered"] for s in slots)
     total = f"£{main['total']:.0f}" if main["total"] is not None else f"£{main['goods_price']:.0f}" if main["goods_price"] else "a price"
     when = f"arriving {clock.hhmm(main['arrival_at'])}" if main["arrival_at"] else "arrival time not specific"
-    summary = f"{sup} quoted {total}, {when}" + (f" · {' & '.join(m.replace('_', ' ') for m in missing)} missing" if missing else "")
+    late = main["arrival_at"] and saved == 0
+    summary = f"{sup} quoted {total}, {when}" + (" — too late" if late else "") + (f" · {_plain(missing)} missing" if missing else "")
     store.log_event(inc["id"], "coordinate", "sourcing_agent", "quote_parsed", summary,
                     {"quote_ids": [x["quote_id"] for x in quotes], "parse_path": path, "missing": missing, "message_id": mail.message_id,
                      "coverage": slots, "bakes_saved": saved, "refs": ["reply parsed into quote fields", "coverage_by_slot"]})
@@ -174,7 +181,7 @@ def handle_quote(inc: dict, thread: dict, mail: Mail) -> str:
           "drop_due_at = GREATEST(drop_due_at, %s) WHERE incident_id = %s AND supplier = %s",
           [now, now + clock.business(rules["chase_after_min"]), now + clock.business(rules["chase_after_min"]), inc["id"], sup])
         store.log_event(inc["id"], "coordinate", "sourcing_agent", "followup_sent",
-                        f"Follow-up sent asking for {' and '.join(m.replace('_at', ' time').replace('_', ' ') for m in missing)}",
+                        f"Follow-up sent asking for {_plain(missing)}",
                         {"missing": missing, "questions": questions, "refs": ["templated follow-up", "missing fields"]})
         return "incomplete"
     status = "incomplete" if missing else "quoted"

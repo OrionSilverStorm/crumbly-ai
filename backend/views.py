@@ -38,7 +38,7 @@ def rules_summary() -> dict:
 
 def incidents() -> list[dict]:
     """All incidents, newest first, with a one-line 'what happened'."""
-    rows = q("SELECT id, ingredient, status, stage, opened_at, resolved_at, shortage_kg, summary, state->>'kind' AS kind, "
+    rows = q("SELECT id, ingredient, status, stage, opened_at, resolved_at, shortage_kg, summary, state->>'kind' AS kind, state ? 'history' AS history, "
              "(SELECT COUNT(*) FROM pending_decisions d WHERE d.incident_id = i.id AND d.status = 'open') AS open_decisions "
              "FROM incidents i ORDER BY opened_at DESC")
     for r in rows:
@@ -79,11 +79,11 @@ def snapshot(incident_id: str) -> dict | None:
 def stock(inc: dict) -> dict:
     """On hand vs on order vs needed (flour on its way is tracked separately from flour on the shelf)."""
     s = (inc["state"] or {}).get("shortage") or {}
-    on_order = sql.query(f"SELECT COALESCE(SUM(quantity_kg), 0) AS kg, MIN(expected_arrival) AS first FROM {sql.T('incoming_deliveries')} "
+    on_order = sql.query(f"SELECT COALESCE(SUM(quantity_kg), 0) AS kg, MAX(expected_arrival) AS last FROM {sql.T('incoming_deliveries')} "
                          "WHERE ingredient = :i AND status = 'confirmed'", {"i": inc["ingredient"]})[0]
     on_hand = s.get("on_hand_kg", 0) - s.get("reserved_kg", 0)
     available = on_hand + (on_order["kg"] or 0)
-    return {"on_hand_kg": on_hand, "on_order_kg": on_order["kg"] or 0, "on_order_arrival": clock.local(on_order["first"]),
+    return {"on_hand_kg": on_hand, "on_order_kg": on_order["kg"] or 0, "on_order_arrival": clock.local(on_order["last"]),  # everything is in by the latest delivery
             "available_kg": available, "needed_kg": s.get("needed_kg", 0), "spare_kg": available - s.get("needed_kg", 0)}
 
 

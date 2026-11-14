@@ -1,0 +1,26 @@
+/* Crumbly theme: calm, friendly, purple accent (from the Figma). */
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-display: "Nunito", "Inter", system-ui, sans-serif;
+  --color-ink: #3b3046;
+  --color-muted: #7d7489;
+  --color-line: #ebe6f0;
+  --color-paper: #faf9f7;
+  --color-lilac: #f1ecf7;
+  --color-lilac-2: #e6ddf1;
+  --color-plum: #6b4c9a;
+  --color-plum-dark: #553a7d;
+  --color-butter: #fff2cc;
+  --color-sage: #e8f2e8;
+  --color-sage-ink: #3c7a4b;
+  --color-amber: #fdf1d6;
+  --color-amber-ink: #8a6510;
+  --color-rose: #fbe9e4;
+  --color-rose-ink: #b0473a;
+}
+
+body { @apply bg-paper text-ink font-sans antialiased; }
+h1, h2, h3 { @apply font-display; }
+:focus-visible { outline: 3px solid var(--color-plum); outline-offset: 2px; }
