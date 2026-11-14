@@ -110,3 +110,15 @@ def last_inbound(incident_id: str, supplier: str) -> Mail | None:
     refs = [x["message_id"] for x in q("SELECT message_id FROM email_messages WHERE incident_id = %s AND supplier = %s "
                                         "AND message_id <> %s ORDER BY sent_or_received_at", [incident_id, supplier, r["message_id"]])]
     return Mail(r["message_id"], r["from_addr"], r["to_addr"], r["subject"], r["body"], r["in_reply_to"], refs)
+
+
+def sync_event_history() -> int:
+    """Periodic copy of new Lakebase events into Delta (incident_events_history) for analytics. Returns rows copied."""
+    import json
+
+    last = sql.query(f"SELECT COALESCE(MAX(id), 0) AS id FROM {sql.T('incident_events_history')}")[0]["id"]
+    rows = q("SELECT * FROM incident_events WHERE id > %s ORDER BY id LIMIT 500", [last])
+    if rows:
+        sql.insert("incident_events_history", [{**{k: r[k] for k in ("id", "incident_id", "ts", "stage", "actor", "type", "summary")},
+                                                "evidence": json.dumps(r["evidence"])} for r in rows])
+    return len(rows)

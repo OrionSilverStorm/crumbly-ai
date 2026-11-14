@@ -60,6 +60,7 @@ async def lifespan(_: FastAPI):
     orchestrator.resume()  # a crash resumes, it doesn't restart
     _loop("poller", 1.0 if settings.email_mode == "memory" else settings.poll_seconds, poll_inbox)
     _loop("timers", 1.0, orchestrator.tick)
+    _loop("event-history", 60.0, store.sync_event_history)  # Lakebase -> Delta copy for analytics
     if settings.bot_inprocess:
         threading.Thread(target=SupplierBot().run, args=(stop,), daemon=True, name="supplier-bot").start()
     yield

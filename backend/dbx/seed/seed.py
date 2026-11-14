@@ -81,7 +81,7 @@ def seed_warehouse() -> None:
     """Delete and re-insert all operational seed rows (Delta tables or the local mirror)."""
     day = clock.tomorrow()
     for t in ("inventory", "production_orders", "recipes", "incoming_deliveries", "approved_products",
-              "suppliers", "delivery_history", "bronze_emails", "silver_quotes", "supplier_research"):
+              "suppliers", "delivery_history", "bronze_emails", "silver_quotes", "supplier_research", "incident_events_history"):
         sql.query(f"DELETE FROM {sql.T(t)}")
     now = clock.now()
     sql.insert("suppliers", [
