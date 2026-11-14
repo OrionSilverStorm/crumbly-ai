@@ -1,0 +1,12 @@
+Subject: Re: {subject}
+Hello {supplier},
+
+Thanks for confirming {po_id}. It doesn't quite match what we agreed:
+{differences}
+
+Could you correct it, or let us know if that isn't possible?
+
+Thank you,
+Morning Loaf purchasing
+
+Ref: {incident_id}/correction

@@ -1,0 +1,17 @@
+# Backend runtime (Databricks Apps installs this file automatically).
+fastapi>=0.115
+uvicorn[standard]>=0.30
+pydantic>=2.7
+psycopg[binary]>=3.2
+psycopg_pool>=3.2
+databricks-sdk>=0.89
+databricks-sql-connector>=4.0
+openai>=1.40
+linkup-sdk>=0.24
+mlflow[databricks]>=3.14
+python-dotenv>=1.0
+# Local-only fallback Postgres (no Docker needed); not used when DB_MODE=lakebase.
+pgserver>=0.1.4; platform_system != "Linux" or python_version < "3.13"
+# Tests
+pytest>=8
+httpx>=0.27

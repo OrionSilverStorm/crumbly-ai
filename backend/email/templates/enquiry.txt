@@ -1,0 +1,15 @@
+Subject: Quote request: {packs} × {pack_size} kg {ingredient} for tomorrow
+Hello {supplier},
+
+Morning Loaf urgently needs {packs} × {pack_size} kg {ingredient}, delivered to {area} tomorrow between {window_start} and {window_end}.
+
+Could you reply with:
+- the price for the goods
+- the delivery charge
+- the VAT rate
+- a specific arrival time
+
+Thank you,
+Morning Loaf purchasing (sent by Crumbly on the owner's behalf)
+
+Ref: {incident_id}/enquiry

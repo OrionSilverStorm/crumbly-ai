@@ -1,0 +1,10 @@
+Subject: Re: {subject}
+Hello {supplier},
+
+Thanks for your quote. So we can compare it fairly, could you confirm just these:
+{questions}
+
+Thank you,
+Morning Loaf purchasing
+
+Ref: {incident_id}/followup

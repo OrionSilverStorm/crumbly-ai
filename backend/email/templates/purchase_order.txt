@@ -1,0 +1,18 @@
+Subject: Purchase order {po_id}: {packs} × {pack_size} kg {ingredient}
+Hello {supplier},
+
+Please supply the following for delivery tomorrow.
+
+Purchase order: {po_id}
+Product: {ingredient}, {pack_size} kg bags ({sku})
+Quantity: {packs} × {pack_size} kg ({kg} kg)
+Unit price: £{unit_price}
+Delivery: £{delivery}
+Total: £{total}
+Arrival: tomorrow {arrival}, Morning Loaf, {area}
+
+Please reply to confirm these details.
+
+Morning Loaf purchasing
+
+Ref: {incident_id}/po

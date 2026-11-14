@@ -1,0 +1,25 @@
+# Databricks App definition. Resources are declared on the app (UI or bundle) and referenced via valueFrom.
+command: ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
+env:
+  - {name: DB_MODE, value: lakebase}
+  - {name: WAREHOUSE_MODE, value: databricks}
+  - {name: DATABRICKS_WAREHOUSE_ID, valueFrom: sql-warehouse}
+  - {name: MLFLOW_TRACING_SQL_WAREHOUSE_ID, valueFrom: sql-warehouse}
+  - {name: LLM_PROVIDER, value: databricks}
+  - {name: LLM_ENDPOINT, valueFrom: serving-endpoint}
+  - {name: MLFLOW_TRACKING_URI, value: databricks}
+  - {name: MLFLOW_EXPERIMENT_NAME, value: /Shared/crumbly}
+  - {name: MLFLOW_UC_TRACES, value: "1"}
+  - {name: UC_CATALOG, value: crumbly}
+  - {name: UC_SCHEMA, value: bakery}
+  - {name: EMAIL_MODE, value: gmail}
+  - {name: EMAIL_BAKERY_ADDRESS, valueFrom: bakery-email}
+  - {name: EMAIL_BAKERY_PASSWORD, valueFrom: bakery-email-password}
+  - {name: EMAIL_SUPPLIERS_ADDRESS, valueFrom: suppliers-email}
+  - {name: EMAIL_SUPPLIERS_PASSWORD, valueFrom: suppliers-email-password}
+  - {name: LINKUP_API_KEY, valueFrom: linkup-api-key}
+  - {name: LINKUP_MODE, value: live}
+  - {name: LINKUP_CACHE, value: "1"}
+  - {name: DEMO_TIME_SCALE, value: "60"}
+  - {name: SUPPLIER_BOT_INPROCESS, value: "1"}
+# Lakebase: add a "Database" resource to the app; Apps inject PGHOST/PGUSER/PGDATABASE/PGPORT/PGSSLMODE.

@@ -1,0 +1,7 @@
+# Optional local Postgres (DB_MODE=postgres, DATABASE_URL=postgresql://crumbly:crumbly@localhost:5432/crumbly).
+# Without Docker, DB_MODE=embedded starts a bundled Postgres via pgserver instead.
+services:
+  postgres:
+    image: postgres:16
+    environment: {POSTGRES_USER: crumbly, POSTGRES_PASSWORD: crumbly, POSTGRES_DB: crumbly}
+    ports: ["5432:5432"]

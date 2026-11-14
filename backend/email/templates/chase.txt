@@ -1,0 +1,9 @@
+Subject: Re: {subject}
+Hello {supplier},
+
+Just checking whether you can help with {packs} × {pack_size} kg {ingredient} for tomorrow morning. A quick yes or no is fine.
+
+Thank you,
+Morning Loaf purchasing
+
+Ref: {incident_id}/chase

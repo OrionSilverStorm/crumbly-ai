@@ -1,0 +1,40 @@
+{
+  "_note": "FICTIONAL fixture for the scripted demo (LINKUP_MODE=fixture). Thames Grain Co. is not a real business; .example domains are reserved. Live mode (default) calls the Linkup API.",
+  "discover": {
+    "data": {
+      "suppliers": [
+        {
+          "supplier_name": "Thames Grain Co.",
+          "website": "thamesgrain.example",
+          "location": "Bermondsey, SE16",
+          "delivery_areas": ["SE1", "SE16", "SE15"],
+          "products": [{"name": "Strong white bread flour", "pack_size_kg": 25}],
+          "next_day_cutoff": "15:00",
+          "earliest_delivery_time": "07:00",
+          "trade_minimum": "£100",
+          "contact_email": "trade@thamesgrain.example",
+          "phone": "020 7946 0000"
+        },
+        {
+          "supplier_name": "Borough Mill",
+          "website": "boroughmill.example",
+          "location": "Southwark, SE1",
+          "delivery_areas": ["SE1"],
+          "products": [{"name": "Strong white flour", "pack_size_kg": 25}]
+        }
+      ]
+    },
+    "sources": [
+      {"name": "Thames Grain Co. · Trade accounts", "url": "https://thamesgrain.example/trade"},
+      {"name": "London Bakery Suppliers · Flour", "url": "https://londonbakerysuppliers.example/flour"}
+    ]
+  },
+  "fetch": {
+    "data": {"delivers_to_area": true, "sells_pack_size": true, "earliest_delivery_time": "07:00", "trade_minimum": "£100"},
+    "sources": [{"name": "Thames Grain Co. · Trade accounts", "url": "https://thamesgrain.example/trade"}]
+  },
+  "verify": {
+    "data": {"delivers_to_area": true, "sells_pack_size": true, "earliest_delivery_time": "09:00", "trade_minimum": null},
+    "sources": [{"name": "London Bakery Suppliers · Flour", "url": "https://londonbakerysuppliers.example/flour"}]
+  }
+}
