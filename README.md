@@ -153,3 +153,73 @@ backend/   main.py (API, SSE, loops) · agents/ (orchestrator, production, sourc
 frontend/  React + Vite + Tailwind (built into frontend/dist, served by FastAPI)
 notebooks/ 01_setup_uc.py · 02_pipeline_demo.py · 03_trace_analysis.sql
 ```
+
+## Status
+
+**Verified locally (offline modes):**
+- **Tests**: all 17 pass (`make test`).
+  - The acceptance numbers: a 160 kg shortage; +175 kg at 05:00 covers every slot, while at 07:00 it covers none; 96% and 91% reliability, computed in SQL.
+  - Pack rounding and the 7 execution checks.
+  - Confirmation matching and PO idempotency.
+  - The Linkup privacy rule.
+  - All four scenarios, end to end.
+  - Crash-resume.
+  - The assistant never ordering without a click.
+- **Live server**: the `happy` scenario resolves end to end at 60× in about 40 s, and every event carries an MLflow trace id.
+  - `short_confirm` produces a mismatch decision, and the top-up resolves it.
+- **UI**: all screens were rendered in headless Edge with no console errors.
+
+**Written to the current docs but not yet run against real services:**
+- Lakebase OAuth credentials.
+- The Databricks SQL warehouse client and UC function DDL.
+- `ai_query` parsing.
+- The serving-endpoint LLM.
+- Gmail IMAP/SMTP.
+- Live Linkup calls.
+- MLflow traces in UC.
+- The Databricks App deploy.
+
+## Next steps
+
+### 1. Credentials and resources needed
+- [ ] **Databricks workspace**:
+  - `DATABRICKS_HOST`, plus a PAT for local dev (Apps use their service principal).
+- [ ] **SQL warehouse**: its ID goes in `DATABRICKS_WAREHOUSE_ID` and `MLFLOW_TRACING_SQL_WAREHOUSE_ID`.
+- [ ] **Unity Catalog**: a catalog and schema (`UC_CATALOG` / `UC_SCHEMA`).
+  - The app identity needs `USE CATALOG`, `USE SCHEMA`, `CREATE TABLE` and `CREATE FUNCTION`.
+  - For trace tables it needs explicit `SELECT` and `MODIFY`.
+- [ ] **Lakebase database**: either `LAKEBASE_ENDPOINT` (Autoscaling) or `LAKEBASE_INSTANCE` (Provisioned).
+  - Add it to the app as a *Database* resource.
+- [ ] **Model serving endpoint**: a chat model that supports `response_format` JSON schema and tool calling, set in `LLM_ENDPOINT`.
+- [ ] **MLflow experiment**: an absolute path, e.g. `/Shared/crumbly`.
+- [ ] **Two Gmail accounts**, each with 2-Step Verification, an app password and IMAP enabled.
+  - These fill `EMAIL_BAKERY_*` and `EMAIL_SUPPLIERS_*`.
+- [ ] **Linkup API key**: `LINKUP_API_KEY`.
+- [ ] **App secrets**: store the Gmail and Linkup secrets as Databricks App secrets, matching the `valueFrom` keys in `app.yaml`.
+
+### 2. Bring-up order (switch one integration at a time and re-run `happy`)
+1. **Warehouse**: `WAREHOUSE_MODE=databricks`, then run `notebooks/01_setup_uc.py`.
+   - Check `calculate_shortage` returns 160 and the `coverage_by_slot` cases match the tests.
+   - **Watch for**: timestamp parameter types in `databricks-sql-connector`, and `DEFAULT` parameters in table functions.
+2. **LLM**: `LLM_PROVIDER=databricks`.
+   - Confirm the scripted emails parse identically to the stub, including Harrow's two offers.
+   - Then confirm `ai_query` runs (`parse_path = ai_query` in `silver_quotes`).
+   - **Watch for**: `responseFormat` being passed as a parameter. If that fails, inline it as a literal; the response format is a constant.
+3. **Lakebase**: `DB_MODE=lakebase`. Confirm the credential refresh works and migrations apply.
+4. **Gmail**: `EMAIL_MODE=gmail`.
+   - Run `make send-cancellation`.
+   - Confirm plus-address replies thread correctly and a supplier is never identified by its `From` address.
+5. **Linkup**: `LINKUP_MODE=live`.
+   - Check the structured discovery output.
+   - Turn on `LINKUP_CACHE=1` before demo day so the demo is repeatable.
+6. **Tracing**: `MLFLOW_UC_TRACES=1`.
+   - Confirm one session per incident.
+   - Fix the column names in `notebooks/03_trace_analysis.sql` after its `DESCRIBE` step.
+7. **Deploy**: `make deploy`, then repeat the demo inside the App.
+
+### 3. Before submission
+- [ ] Run `happy` and `short_confirm` end to end, three times each, from `make reset`.
+- [ ] Record the backup video.
+- [ ] Optional (first on the cut list): an AI/BI dashboard over `incident_events_history` and the trace tables.
+- [ ] Optional: tune the demo copy for the judges.
+  - Example: show business-time durations in metrics. "Time to recover" currently uses wall-clock minutes, so it is compressed at 60×.
