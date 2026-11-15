@@ -127,13 +127,9 @@ We first designed and built the entire end-to-end Crumbly experience in Figma be
 
 Explore our interactive design:
 
-<iframe
-  style="border: 1px solid rgba(0, 0, 0, 0.1);"
-  width="100%"
-  height="600"
-  src="https://embed.figma.com/design/ylQbBHmu0tDjAwhdYeOud6/Crumbly?node-id=0-1&embed-host=github"
-  allowfullscreen
-></iframe>
+[![Crumbly Figma Prototype](https://placehold.co/1200x600/f5f0e8/493b32?text=Crumbly+%7C+Explore+Our+Figma+Prototype)](https://www.figma.com/design/ylQbBHmu0tDjAwhdYeOud6/Crumbly?node-id=0-1)
+
+[**View the interactive Figma prototype →**](https://www.figma.com/design/ylQbBHmu0tDjAwhdYeOud6/Crumbly?node-id=0-1)
 
 
 ## How it works
