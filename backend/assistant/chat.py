@@ -73,8 +73,8 @@ INTENTS = [  # (pattern on the owner's words, tool, args)
     (r"alder|juniper|corner shop|customer|pastr|loaves|affected orders", "get_affected_orders", {}),
     (r"limit|rule", "get_rules", {}),
     (r"how .*doing|metric|so far", "get_metrics", {}),
-    (r"what does|what is|mean", "explain_term", None),
-    (r"what happened|what'?s going on|status|what should i do|what do i do|is .* ok|tomorrow", "get_incident_summary", {}),
+    (r"what does|what is (?!happening|going on|(the |my )?status)|mean", "explain_term", None),
+    (r"what happened|what'?s (going on|happening)|what is happening|status|what should i do|what do i do|is .* ok|tomorrow", "get_incident_summary", {}),
     (r".*", "get_capabilities", {}),
 ]
 
@@ -127,7 +127,7 @@ def _phrase(r: dict, user: str) -> str:
         st, sh = s["stock"], s["shortage"] or {}
         slots = s.get("coverage_now") or []
         ok = sum(x["covered"] for x in slots)
-        if re.search(r"what happened|going on", user, re.I):
+        if re.search(r"what happened|going on|happening", user, re.I):
             outcome = (f"It is sorted now: {st['on_order_kg']:g} kg is arriving at {st['on_order_arrival'][11:16]}, "
                        f"and all {len(slots)} bakes are covered.") if slots and ok == len(slots) else "Crumbly is asking suppliers for a replacement now."
             return (f"{s.get('original_supplier') or 'Your supplier'} cancelled tomorrow’s {s['ingredient']} delivery. "
@@ -152,7 +152,7 @@ def _phrase(r: dict, user: str) -> str:
         others = "; ".join(f"{p['suppliers'][0]} was {', '.join(p['reasons']).lower()}" for p in qd["disqualified"])
         lead = "The replacement costs" if re.search(r"cost|price|charge|spend|paid|pay|how much", user, re.I) else "We picked"
         subject = f" £{float(best['total']):.0f} from {' + '.join(best['suppliers'])}" if lead.startswith("The") else f" {' + '.join(best['suppliers'])} at £{float(best['total']):.0f}"
-        return (f"{lead}{subject}. We put reliability first, then cost — a cheap order that turns up late doesn't help."
+        return (f"{lead}{subject}".rstrip(".") + ". We put reliability first, then cost — a cheap order that turns up late doesn't help."
                 + (f"\n\nThe others: {others}." if others else "") + "\n\nNext step: nothing, unless you'd rather not use them.")
     if "get_rules" in r:
         x = r["get_rules"]

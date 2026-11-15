@@ -56,7 +56,9 @@ export function Confirmation({ snap, reload }: { snap: J; reload: () => void }) 
             <Row k="Needed for tomorrow" v={kg(s.needed_kg)} strong />
             <Row k={s.spare_kg >= 0 ? "Spare" : "Short"} v={<span className={s.spare_kg >= 0 ? "text-sage-ink" : "text-rose-ink"}>{kg(Math.abs(s.spare_kg))}</span>} strong />
           </div>
-          <p className="mt-3 rounded-2xl bg-white/60 p-3 text-xs text-plum">Physical stock stays at {kg(s.on_hand_kg)} until the delivery is received and checked in.</p>
+          <p className="mt-3 rounded-2xl bg-white/60 p-3 text-xs text-plum">{s.on_order_kg > 0
+            ? `Physical stock stays at ${kg(s.on_hand_kg)} until the delivery is received and checked in.`
+            : `Delivery checked in: ${kg(s.on_hand_kg)} is now on your shelf.`}</p>
           <p className="mt-2 text-xs text-muted">coverage_by_slot · {hhmm(snap.events.filter((e: J) => e.type === "coverage_recalculated").pop()?.ts)}</p>
         </Card>
       </div>

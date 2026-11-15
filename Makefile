@@ -3,7 +3,10 @@ PY := $(if $(wildcard .venv/Scripts/python.exe),.venv/Scripts/python,.venv/bin/p
 PORT ?= 8000
 SCENARIO ?= happy
 
-.PHONY: install build dev test reset send-cancellation bot uc-setup deploy
+# With no .env (a fresh clone), run demo-ready: 60x timers and the bundled Linkup fixture. A .env always wins.
+DEMO_DEFAULTS := $(if $(wildcard .env),,DEMO_TIME_SCALE=60 LINKUP_MODE=fixture)
+
+.PHONY: install build dev test smoke reset send-cancellation bot uc-setup deploy
 
 install:          ## Python venv + frontend packages
 	python -m venv .venv && $(PY) -m pip install -r requirements.txt
@@ -13,10 +16,13 @@ build:            ## Build the React app into frontend/dist (served by FastAPI)
 	cd frontend && npm run build
 
 dev: build        ## Run the whole app locally on http://localhost:$(PORT)
-	$(PY) -m uvicorn backend.main:app --port $(PORT)
+	$(DEMO_DEFAULTS) $(PY) -m uvicorn backend.main:app --port $(PORT)
 
 test:             ## Offline test suite (embedded Postgres, in-memory mail, stub LLM, Linkup fixtures)
 	$(PY) -m pytest
+
+smoke:            ## Drive scenarios through the running app (make smoke RUNS="happy happy happy")
+	$(PY) -m backend.demo.smoke $(RUNS)
 
 reset:            ## Reset demo data, mailboxes and scenario (make reset SCENARIO=short_confirm)
 	curl -s -X POST localhost:$(PORT)/api/demo/reset -H 'content-type: application/json' -d '{"scenario":"$(SCENARIO)"}' \

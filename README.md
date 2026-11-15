@@ -67,8 +67,13 @@ flowchart LR
 ```bash
 make install        # Python venv + frontend packages
 make dev            # builds the UI and serves http://localhost:8000
-make test           # 21 tests, fully offline
+make test           # 26 tests, fully offline; ends with a plain-English "What these tests prove" checklist
+make smoke          # with `make dev` running: drives all four scenarios through the HTTP API and times them
 ```
+
+Without a `.env`, `make dev` runs demo-ready: `DEMO_TIME_SCALE=60` (a 30-minute supplier chase takes 30 seconds) and
+`LINKUP_MODE=fixture`. Running uvicorn directly without those means suppliers reply in real minutes. A `.env` always
+takes precedence.
 
 Defaults are offline:
 - `DB_MODE=embedded`: a bundled Postgres via `pgserver`, so no Docker is needed.
@@ -157,7 +162,7 @@ notebooks/ 01_setup_uc.py · 02_pipeline_demo.py · 03_trace_analysis.sql
 ## Status
 
 **Verified locally (offline modes):**
-- **Tests**: all 21 pass (`make test`).
+- **Tests**: all 26 pass (`make test`).
   - The acceptance numbers: a 160 kg shortage; +175 kg at 05:00 covers every slot, while at 07:00 it covers none; 96% and 91% reliability, computed in SQL.
   - Pack rounding and the 7 execution checks.
   - Confirmation matching and PO idempotency.

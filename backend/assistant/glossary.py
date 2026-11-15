@@ -12,6 +12,9 @@ TERMS = {
     "follow-up": "A short email asking a supplier for the details they left out, so we can compare offers fairly.",
     "confirmation": "The supplier's reply agreeing to an order. We check every detail against what was agreed before accepting it.",
     "linkup": "A web research service Crumbly uses to find and double-check new suppliers. It only ever searches for the ingredient and your area, never your customers.",
+    "top-up": "A small extra order from a second approved supplier to fill a gap, for example one more bag when a supplier confirms fewer than we asked for. It still has to pass every one of your rules.",
+    "mismatch": "When a supplier's confirmation doesn't match what was agreed, such as fewer bags or a different price. Crumbly never quietly accepts it; it shows you the difference and asks.",
+    "split order": "Buying from two suppliers at once because neither can cover everything in time on its own.",
     "incident": "One problem with a delivery, from the moment we spot it until it's sorted.",
     "reliability": "How often a supplier arrives on time and brings the full amount. Crumbly checks this before price, because cheap flour that arrives late cannot protect a bake.",
     "coverage": "Whether the flour available by a bake time is enough for everything due by then. Flour arriving too late does not count.",
@@ -22,8 +25,11 @@ TERMS = {
 
 def explain(term: str) -> dict:
     """Best-match definition, or a polite 'don't know'."""
-    t = term.lower().strip()
-    for k, v in TERMS.items():
-        if k in t or t in k:
-            return {"term": k, "meaning": v}
-    return {"term": term, "meaning": None}
+    norm = lambda s: s.lower().replace("-", " ").strip()  # noqa: E731  ("top up" == "top-up")
+    t = norm(term)
+    hits = [k for k in TERMS if t and (norm(k) in t or t in norm(k))]
+    if not hits:
+        return {"term": term, "meaning": None}
+    # The head noun is usually last ("confirmation mismatch" -> mismatch); ties go to the longer, more specific term.
+    k = max(hits, key=lambda k: (t.rfind(norm(k)), len(k)))
+    return {"term": k, "meaning": TERMS[k]}

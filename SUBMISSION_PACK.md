@@ -169,7 +169,7 @@ The exact failure-path clicks and 45-second narration are in `NON_HAPPY_DEMO.md`
 
 ### Product proof
 
-- [ ] `make test` reports 21 passed.
+- [ ] `make test` reports 26 passed.
 - [ ] `make build` succeeds.
 - [ ] Three clean `happy` runs completed.
 - [ ] One `short_confirm` run completed and the one-bag top-up resolved it.

@@ -117,6 +117,8 @@ async def stream(incident_id: str):
 async def export(incident_id: str):
     """The append-only event log as downloadable JSON."""
     snap = await _io(views.snapshot, incident_id)
+    if not snap:
+        raise HTTPException(404, "No such incident")
     body = json.dumps({"incident": snap["incident"], "events": snap["events"]}, indent=2, default=str)
     return JSONResponse(json.loads(body), headers={"Content-Disposition": f'attachment; filename="{incident_id}-events.json"'})
 

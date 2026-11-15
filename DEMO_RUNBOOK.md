@@ -70,6 +70,9 @@ make dev
 
 Then visit <http://127.0.0.1:8000>, use **Start demo (reset + trigger)** and wait about 40 seconds for the live-Linkup happy path.
 
+In a second terminal, `make smoke RUNS="happy happy happy short_confirm"` replays the scenarios through the HTTP API and prints
+each run's duration and purchase orders, which is the pre-recording check. It refuses to run at 1× demo time.
+
 Before recording:
 
 1. Close unrelated browser tabs and notifications.
@@ -83,7 +86,7 @@ Before recording:
 
 - Linkup: keep `LINKUP_CACHE=1` after one successful live run, then reset and record again.
 - Databricks: show the successful `crumbly.bakery` SQL result and use the local mirror for the UI; the SQL semantics and acceptance figures are tested identically.
-- Network: all four scenarios are deterministic with the bundled Linkup fixture, and all 21 tests are offline. With live Linkup, use `happy`, `short_confirm` or `owner_rejects`; the UI deliberately disables `new_supplier_wins` because a live search may discover a supplier the scripted responder does not represent.
+- Network: all four scenarios are deterministic with the bundled Linkup fixture, and all 26 tests are offline. With live Linkup, use `happy`, `short_confirm` or `owner_rejects`; the UI deliberately disables `new_supplier_wins` because a live search may discover a supplier the scripted responder does not represent.
 
 ## Submission wording
 

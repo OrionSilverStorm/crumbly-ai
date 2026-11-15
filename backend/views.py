@@ -91,7 +91,11 @@ def stock(inc: dict) -> dict:
     s = (inc["state"] or {}).get("shortage") or {}
     on_order = sql.query(f"SELECT COALESCE(SUM(quantity_kg), 0) AS kg, MAX(expected_arrival) AS last FROM {sql.T('incoming_deliveries')} "
                          "WHERE ingredient = :i AND status = 'confirmed'", {"i": inc["ingredient"]})[0]
-    on_hand = s.get("on_hand_kg", 0) - s.get("reserved_kg", 0)
+    # Live shelf stock, not the snapshot taken when the incident opened: a delivery the owner marks as received leaves
+    # "on order" and lands here, so reading the snapshot would make received flour vanish from the totals.
+    inv = sql.query(f"SELECT COALESCE(SUM(quantity_kg), 0) AS kg, COALESCE(SUM(reserved_kg), 0) AS reserved FROM {sql.T('inventory')} "
+                    "WHERE ingredient = :i", {"i": inc["ingredient"]})[0]
+    on_hand = float(inv["kg"] or 0) - float(inv["reserved"] or 0)
     available = on_hand + (on_order["kg"] or 0)
     return {"on_hand_kg": on_hand, "on_order_kg": on_order["kg"] or 0, "on_order_arrival": clock.local(on_order["last"]),  # everything is in by the latest delivery
             "available_kg": available, "needed_kg": s.get("needed_kg", 0), "spare_kg": available - s.get("needed_kg", 0)}
