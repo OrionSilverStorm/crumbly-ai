@@ -3,12 +3,22 @@ from datetime import timedelta
 from decimal import Decimal as D
 
 from backend.agents import tools
+from backend.config import ROOT, load
 from backend.demo import clock
 from backend.demo.reset import reset
 from backend.execution import service as ex
 from backend.execution.quotes import normalise, packs_needed
+from backend.research.linkup import FoundSupplier, Linkup
 
 FLOUR = "strong white flour"
+
+
+def test_blank_optional_environment_values_use_safe_defaults(monkeypatch):
+    monkeypatch.setenv("PGDATA_DIR", "")
+    monkeypatch.setenv("MLFLOW_TRACKING_URI", "")
+    configured = load()
+    assert configured.pgdata == str(ROOT / ".pgdata")
+    assert configured.mlflow_tracking_uri == f"sqlite:///{(ROOT / '.mlflow' / 'mlflow.db').as_posix()}"
 
 
 def _cancel_po():
@@ -51,6 +61,22 @@ def test_pack_rounding():
     assert packs_needed(150, 25) == 6
     assert packs_needed(151, 25) == 7
     assert packs_needed(0, 25) == 0
+
+
+def test_linkup_verification_fetches_discovered_supplier_page(monkeypatch):
+    supplier = FoundSupplier(supplier_name="Example Mill", website="https://mill.example/products/flour")
+    calls = []
+
+    def fake_call(self, op, **kw):
+        calls.append((op, kw))
+        url = kw["url"] if op == "fetch" else "https://independent.example"
+        return {"data": {"sells_pack_size": True}, "sources": [{"url": url}]}
+
+    monkeypatch.setattr(Linkup, "_call", fake_call)
+    claims = Linkup().verify(supplier, "flour", 25, "E1")
+
+    assert calls[0][1]["url"] == supplier.website
+    assert next(c for c in claims if c["field"] == "sells_pack_size")["status"] == "confirmed"
 
 
 def test_missing_fields_detected_by_code():

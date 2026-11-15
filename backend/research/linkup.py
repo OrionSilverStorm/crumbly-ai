@@ -8,6 +8,9 @@ import json
 import re
 from pathlib import Path
 
+from linkup import (LinkupFailedFetchError, LinkupFetchResponseTooLargeError,
+                    LinkupFetchTargetNotFoundError, LinkupFetchTargetUnreachableError,
+                    LinkupFetchUnsupportedContentTypeError, LinkupTimeoutError)
 from pydantic import BaseModel
 
 from backend.config import ROOT, settings
@@ -114,8 +117,13 @@ class Linkup:
     @traced("linkup.verify", span_type="RETRIEVER")
     def verify(self, s: FoundSupplier, ingredient: str, pack_size_kg: float, area: str) -> list[dict]:
         """Cross-check key claims: the supplier's own page (/fetch) vs. an independent search excluding their domain."""
-        own_url = f"https://{domain(s.website)}/trade" if s.website else None
-        own = self._call("fetch", url=own_url, schema=Claims) if own_url else None
+        own = None
+        if s.website:
+            try:
+                own = self._call("fetch", url=s.website, schema=Claims)
+            except (LinkupFailedFetchError, LinkupFetchResponseTooLargeError, LinkupFetchTargetNotFoundError,
+                    LinkupFetchTargetUnreachableError, LinkupFetchUnsupportedContentTypeError, LinkupTimeoutError):
+                pass  # The independent check can still run when a supplier page is unavailable.
         ind = self._call("search", query=verify_query(s.supplier_name, ingredient, pack_size_kg, area),
                          schema=Claims, exclude_domains=[domain(s.website)] if s.website else None)
         own_c = Claims.model_validate(own["data"]) if own else Claims(

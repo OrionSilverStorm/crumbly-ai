@@ -12,8 +12,9 @@ load_dotenv(ROOT / ".env")
 
 
 def _env(name: str, default: str = "") -> str:
-    """Read a string env var, falling back to a default."""
-    return os.getenv(name, default)
+    """Read a string env var, treating an unset or blank value as the documented default."""
+    value = os.getenv(name)
+    return default if value is None or not value.strip() else value
 
 
 def _flag(name: str, default: str = "0") -> bool:
