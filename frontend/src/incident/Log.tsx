@@ -1,6 +1,6 @@
 // Full incident event log: append-only timeline with actors, evidence and MLflow trace links; Replay and Export.
 import { useEffect, useState } from "react";
-import type { J } from "../api";
+import { type J, useApi } from "../api";
 import { hhmm } from "../format";
 import { Badge, Button, Card, Row, Title } from "../ui";
 
@@ -12,6 +12,7 @@ const ACTOR: Record<string, [string, Parameters<typeof Badge>[0]["tone"], string
 
 export default function Log({ snap }: { snap: J }) {
   const inc = snap.incident, events: J[] = snap.events;
+  const { data: cfg } = useApi("/api/config", 15000);
   const [step, setStep] = useState<number | null>(null); // null = show everything; a number = replaying up to that event
   useEffect(() => {
     if (step === null || step >= events.length) return;
@@ -67,7 +68,11 @@ export default function Log({ snap }: { snap: J }) {
           <Card>
             <h2 className="text-xl font-bold">Behind the scenes</h2>
             <p className="mb-3 mt-1 text-sm text-muted">State is saved after every step, so a restart picks up where it left off. Every tool call and decision is traced.</p>
-            <div className="flex flex-wrap gap-2"><Badge>Operational data in Databricks</Badge><Badge>Supplier research by Linkup</Badge><Badge>Decisions traced with MLflow</Badge></div>
+            <div className="flex flex-wrap gap-2">
+              <Badge>{cfg?.modes?.warehouse === "databricks" ? "Operational data in Databricks" : "Local mirror of Databricks schema"}</Badge>
+              <Badge>{cfg?.modes?.linkup === "live" ? "Live supplier research by Linkup" : "Controlled Linkup research fixture"}</Badge>
+              <Badge>{String(cfg?.modes?.tracing?.location ?? "").startsWith("unity_catalog:") ? "MLflow traces in Unity Catalog" : "Local MLflow traces"}</Badge>
+            </div>
           </Card>
         </div>
       </div>

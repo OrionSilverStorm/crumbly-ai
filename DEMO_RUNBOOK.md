@@ -79,7 +79,7 @@ Before recording:
 
 - Linkup: keep `LINKUP_CACHE=1` after one successful live run, then reset and record again.
 - Databricks: show the successful `crumbly.bakery` SQL result and use the local mirror for the UI; the SQL semantics and acceptance figures are tested identically.
-- Network: the four bundled scenarios and supplier replies remain deterministic and all 20 tests are offline.
+- Network: all four scenarios are deterministic with the bundled Linkup fixture, and all 21 tests are offline. With live Linkup, use `happy`, `short_confirm` or `owner_rejects`; the UI deliberately disables `new_supplier_wins` because a live search may discover a supplier the scripted responder does not represent.
 
 ## Submission wording
 

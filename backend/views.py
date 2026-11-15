@@ -24,10 +24,20 @@ def reliability(supplier: str) -> dict:
 
 def config() -> dict:
     """Demo badge, modes and footer for the shell."""
+    warehouse = "Databricks warehouse" if settings.warehouse_mode == "databricks" else "local Databricks-schema mirror"
+    email = "Gmail transport" if settings.email_mode == "gmail" else "controlled demo inbox"
+    model = "Databricks model" if settings.llm_provider == "databricks" else "deterministic extraction" if settings.llm_provider == "stub" else "external model"
+    linkup = "live Linkup research" if settings.linkup_mode == "live" else "controlled Linkup fixture"
     return {"scenario": store.demo_state("scenario", settings.scenario), "time_scale": settings.time_scale,
             "modes": {"db": settings.db_mode, "warehouse": settings.warehouse_mode, "llm": settings.llm_provider,
                       "email": settings.email_mode, "linkup": settings.linkup_mode, "tracing": tracing.status()},
-            "footer": "Live Linkup research · deterministic demo inbox · fictional bakery data",
+            "scenario_availability": {
+                "new_supplier_wins": {
+                    "enabled": settings.linkup_mode == "fixture",
+                    "reason": "This controlled scenario needs the bundled Linkup fixture and scripted Thames Grain reply."
+                }
+            },
+            "footer": f"{linkup} · {warehouse} · {email} · {model} · fictional bakery data",
             "rules": rules_summary()}
 
 

@@ -222,6 +222,8 @@ class ResetIn(BaseModel):
 
 @app.post("/api/demo/reset")
 async def reset(body: ResetIn):
+    if body.scenario == "new_supplier_wins" and settings.linkup_mode != "fixture":
+        raise HTTPException(409, "The controlled new-supplier scenario requires LINKUP_MODE=fixture. Live Linkup may discover a different supplier, so Crumbly will not present that run as deterministic.")
     def run():
         with orchestrator.lock:  # never reset in the middle of a step
             return demo_reset.reset(body.scenario)

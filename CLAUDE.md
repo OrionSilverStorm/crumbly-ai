@@ -18,7 +18,7 @@ Read `README.md` and `DEMO_RUNBOOK.md`. Keep changes small, tested and reversibl
 
 ## Verified state
 
-- 20 tests pass.
+- 21 tests pass.
 - All four local scenarios work end to end.
 - Happy path with live Linkup completes in roughly 40 seconds at 60× demo time.
 - Linkup now fetches the actual supplier source page before verifying claims.

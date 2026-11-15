@@ -9,6 +9,7 @@ from backend.demo.reset import reset
 from backend.execution import service as ex
 from backend.execution.quotes import normalise, packs_needed
 from backend.research.linkup import FoundSupplier, Linkup
+from backend import views
 
 FLOUR = "strong white flour"
 
@@ -19,6 +20,16 @@ def test_blank_optional_environment_values_use_safe_defaults(monkeypatch):
     configured = load()
     assert configured.pgdata == str(ROOT / ".pgdata")
     assert configured.mlflow_tracking_uri == f"sqlite:///{(ROOT / '.mlflow' / 'mlflow.db').as_posix()}"
+
+
+def test_config_describes_demo_modes_honestly(monkeypatch):
+    monkeypatch.setattr(views.store, "demo_state", lambda *_: "happy")
+    monkeypatch.setattr(views, "rules_summary", lambda: {})
+    configured = views.config()
+    assert "local Databricks-schema mirror" in configured["footer"]
+    assert "controlled demo inbox" in configured["footer"]
+    assert "deterministic extraction" in configured["footer"]
+    assert configured["scenario_availability"]["new_supplier_wins"]["enabled"] is True
 
 
 def _cancel_po():

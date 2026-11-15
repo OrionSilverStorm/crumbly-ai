@@ -100,6 +100,7 @@ function DemoMenu({ cfg }: { cfg: any }) { // eslint-disable-line @typescript-es
   const [busy, setBusy] = useState("");
   const [scenario, setScenario] = useState("happy");
   const [error, setError] = useState("");
+  const newSupplier = cfg?.scenario_availability?.new_supplier_wins;
   useEffect(() => { if (cfg?.scenario) setScenario(cfg.scenario); }, [cfg?.scenario]);
   const run = async (label: string, fn: () => Promise<unknown>) => {
     setBusy(label); setError("");
@@ -113,9 +114,13 @@ function DemoMenu({ cfg }: { cfg: any }) { // eslint-disable-line @typescript-es
         <div className="absolute right-0 top-10 z-30 w-72 space-y-3 rounded-2xl border border-line bg-white p-4 text-sm shadow-lg">
           <label className="block text-xs text-muted">Scenario
             <select value={scenario} onChange={(e) => setScenario(e.target.value)} className="mt-1 block w-full rounded-xl border border-line p-2 text-sm">
-              {["happy", "short_confirm", "new_supplier_wins", "owner_rejects"].map((s) => <option key={s}>{s}</option>)}
+              {["happy", "short_confirm", "new_supplier_wins", "owner_rejects"].map((s) => (
+                <option key={s} disabled={s === "new_supplier_wins" && newSupplier?.enabled === false}>
+                  {s === "new_supplier_wins" ? `new_supplier_wins${newSupplier?.enabled === false ? " (controlled fixture only)" : ""}` : s}
+                </option>))}
             </select>
           </label>
+          {newSupplier?.enabled === false && <p className="rounded-xl bg-amber p-2 text-xs text-amber-ink">{newSupplier.reason} Restart with <code>LINKUP_MODE=fixture</code> to run it.</p>}
           <button className="w-full rounded-full bg-lilac px-3 py-2 font-medium text-plum" disabled={!!busy}
             onClick={() => run("reset", async () => { await api("/api/demo/reset", { scenario }); window.location.hash = "#/"; })}>
             {busy === "reset" ? "Resetting…" : "Reset demo data"}</button>

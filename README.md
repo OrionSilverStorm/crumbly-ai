@@ -157,7 +157,7 @@ notebooks/ 01_setup_uc.py · 02_pipeline_demo.py · 03_trace_analysis.sql
 ## Status
 
 **Verified locally (offline modes):**
-- **Tests**: all 20 pass (`make test`).
+- **Tests**: all 21 pass (`make test`).
   - The acceptance numbers: a 160 kg shortage; +175 kg at 05:00 covers every slot, while at 07:00 it covers none; 96% and 91% reliability, computed in SQL.
   - Pack rounding and the 7 execution checks.
   - Confirmation matching and PO idempotency.
@@ -179,7 +179,6 @@ notebooks/ 01_setup_uc.py · 02_pipeline_demo.py · 03_trace_analysis.sql
 - `ai_query` parsing.
 - The serving-endpoint LLM.
 - Gmail IMAP/SMTP.
-- Live Linkup calls.
 - MLflow traces in UC.
 - The Databricks App deploy.
 

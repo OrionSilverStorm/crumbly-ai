@@ -75,7 +75,7 @@ INTENTS = [  # (pattern on the owner's words, tool, args)
     (r"how .*doing|metric|so far", "get_metrics", {}),
     (r"what does|what is|mean", "explain_term", None),
     (r"what happened|what'?s going on|status|what should i do|what do i do|is .* ok|tomorrow", "get_incident_summary", {}),
-    (r".*", "get_incident_summary", {}),
+    (r".*", "get_capabilities", {}),
 ]
 
 
@@ -117,8 +117,9 @@ def _phrase(r: dict, user: str) -> str:
     if "get_pending_decision" in r:
         return "Nothing is waiting for you right now. Crumbly will ask if anything falls outside your rules.\n\nYou don't need to do anything."
     if "get_capabilities" in r:
-        return ("I can explain the live incident, compare the offers and prepare a decision for you. I cannot place an order, "
-                "send an email or change a rule from this chat.\n\nIf action is needed, I’ll show a confirmation button so you stay in control.")
+        return ("I can explain what happened, affected orders, production coverage, supplier offers, cost and anything needing your approval. "
+                "I cannot place an order, send an email or change a rule from this chat.\n\n"
+                "If action is needed, I’ll show a confirmation button so you stay in control. Try asking “What happened?” or “How much will this cost?”")
     if "get_incident_summary" in r:
         s = r["get_incident_summary"]
         if s.get("error"):

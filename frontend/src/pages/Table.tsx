@@ -1,4 +1,4 @@
-// Read-only view of an operational Delta table (Production, Inventory + incoming deliveries).
+// Read-only operational data view. /api/config says whether the source is Databricks or its local mirror.
 import { type J, useApi } from "../api";
 import { hhmm } from "../format";
 import { Card, Title, Waiting } from "../ui";
@@ -21,9 +21,13 @@ function Grid({ name }: { name: string }) {
 }
 
 export default function Table({ name, title, also }: { name: string; title: string; also?: string }) {
+  const { data: cfg } = useApi("/api/config", 15000);
+  const source = cfg?.modes?.warehouse === "databricks"
+    ? "Live from the Databricks SQL warehouse (read-only here)."
+    : "Live from the local mirror of the Databricks schema (read-only here).";
   return (
     <>
-      <Title sub="Live from your operational data in Databricks (read-only here).">{title}</Title>
+      <Title sub={source}>{title}</Title>
       <Card><Grid name={name} /></Card>
       {also && <><h2 className="mb-3 mt-8 text-xl font-bold">Deliveries on their way</h2><Card><Grid name={also} /></Card>
         <p className="mt-3 text-xs text-muted">Confirmed deliveries count as “on order”. Physical stock only changes when you mark a delivery received.</p></>}

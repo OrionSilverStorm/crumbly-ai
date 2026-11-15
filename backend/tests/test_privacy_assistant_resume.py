@@ -49,6 +49,9 @@ def test_assistant_routes_common_owner_questions(scenario):
     term = chat.chat("What does reliability mean?", incident_id=iid)
     assert "arrives on time" in term["reply"]
 
+    unknown = chat.chat("Can it make croissants sing?", incident_id=iid)
+    assert "affected orders" in unknown["reply"] and "What happened?" in unknown["reply"]
+
 
 def test_assistant_too_expensive_prepares_card_and_never_orders(scenario):
     drive = scenario("owner_rejects")
