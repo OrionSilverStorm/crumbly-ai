@@ -7,9 +7,15 @@ rules, places the order (or asks first), and then checks the supplier's confirma
 
 > Imperial AI Hackathon · **Autonomous Agents** track · Databricks and Linkup bounties
 
-**[▶ Watch the demo video](demo/crumbly-demo.mp4)** · [Screenshot overview](docs/overview/)
+**[▶ Watch the demo video](#demo-video)** · [Screenshot overview](docs/overview/)
 
 ![Crumbly incident home page showing a cancelled flour delivery detected from email](docs/screenshots/02-cancellation-detected.png)
+
+## Demo video
+
+<!-- Add the YouTube link below, e.g. [![Crumbly demo video](https://img.youtube.com/vi/VIDEO_ID/maxresdefault.jpg)](https://www.youtube.com/watch?v=VIDEO_ID) -->
+
+▶ **YouTube:** _link coming soon_
 
 ## The 60-second version
 
