@@ -1,4 +1,4 @@
-# crumbly — *A little less worry.*
+# crumbly *A little less worry.*
 
 An emergency purchasing agent for independent wholesale bakeries. When a supplier cancels or shortens a delivery,
 Crumbly detects the email, works out exactly which bakes are at risk, emails approved suppliers and researches new ones
