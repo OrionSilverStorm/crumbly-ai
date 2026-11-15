@@ -25,7 +25,7 @@ flour. Crumbly finds the bakery is **160 kg short (7 bags)**, which would hit th
 
 ## Watch it work
 
-All screenshots below were taken from the running app, not mocked up.
+Every screenshot below is captured from the running application; nothing is mocked up.
 
 ### 1. Detect: the cancellation email becomes an incident
 
@@ -179,8 +179,8 @@ flowchart LR
 
 ## What's real and what's a stand-in
 
-We'd rather be upfront about this than have judges discover it. The demo video uses deterministic local stand-ins so
-that every run is repeatable, and the footer of every screen says so.
+Transparency is a design principle. The demo uses deterministic local stand-ins so that every run is repeatable, and
+the footer of every screen states which mode is active.
 
 | Piece | Verified against the real service | Demo / offline stand-in |
 |---|---|---|
