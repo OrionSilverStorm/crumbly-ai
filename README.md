@@ -120,6 +120,22 @@ time, where a 30-minute supplier chase takes 30 seconds.
 
 </details>
 
+
+## Design & Prototype
+
+We first designed and built the entire end-to-end Crumbly experience in Figma before implementing the application.
+
+Explore our interactive design:
+
+<iframe
+  style="border: 1px solid rgba(0, 0, 0, 0.1);"
+  width="100%"
+  height="600"
+  src="https://embed.figma.com/design/ylQbBHmu0tDjAwhdYeOud6/Crumbly?node-id=0-1&embed-host=github"
+  allowfullscreen
+></iframe>
+
+
 ## How it works
 
 ```mermaid
