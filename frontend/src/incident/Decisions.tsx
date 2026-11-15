@@ -58,7 +58,7 @@ export function Decide({ snap, reload }: { snap: J; reload: () => void }) {
   return (
     <>
       <Title sub={proposal ? `Updated ${hhmm(picked?.ts)}: ${gbp(proposal.total)} in total for ${kg(proposal.kg)}. Here’s how we checked it.` : "No single offer passes every rule yet."}>
-        {proposal ? (proposal.qualifies && !proposal.needs_owner.length ? `${list(proposal.suppliers)} ticks every box.` : `${list(proposal.suppliers)} is our best option.`) : "Still weighing up the offers."}
+        {proposal ? (proposal.qualifies && !proposal.needs_owner.length ? `${list(proposal.suppliers)} ${proposal.suppliers.length > 1 ? "tick" : "ticks"} every box.` : `${list(proposal.suppliers)} ${proposal.suppliers.length > 1 ? "are our best options" : "is our best option"}.`) : "Still weighing up the offers."}
       </Title>
       <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
         <Card>
