@@ -2,6 +2,8 @@
 
 For the exact two-minute voice-over and shot sequence, use [`VIDEO_SCRIPT.md`](VIDEO_SCRIPT.md). For Devpost copy, judge Q&A, final-round fallback and the deadline checklist, use [`SUBMISSION_PACK.md`](SUBMISSION_PACK.md).
 
+For the recommended live failure path—six bags confirmed instead of seven, followed by a validated one-bag top-up—use [`NON_HAPPY_DEMO.md`](NON_HAPPY_DEMO.md).
+
 ## The one-line pitch
 
 Crumbly is an autonomous recovery agent for small bakeries: when a supplier lets them down, it works out the production impact, researches and negotiates replacements, applies the owner's rules, places the safe order and verifies the confirmation.

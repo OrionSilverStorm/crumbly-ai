@@ -163,6 +163,8 @@ If selected for the Autonomous Agents final:
 6. If asked for a failure path, show the already-completed `short_confirm` incident or run it only if time permits.
 7. Never choose `new_supplier_wins` while Linkup mode is live; that controlled scenario requires the fixture and the UI deliberately disables it.
 
+The exact failure-path clicks and 45-second narration are in `NON_HAPPY_DEMO.md`.
+
 ## Submission checklist
 
 ### Product proof

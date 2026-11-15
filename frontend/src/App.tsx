@@ -28,6 +28,13 @@ const NAV = [
   { href: "#/suppliers", label: "Suppliers", key: "suppliers" },
 ];
 
+const DEMO_SCENARIOS = [
+  { id: "happy", label: "Happy path", description: "The approved supplier recovers all three bakes automatically." },
+  { id: "short_confirm", label: "Confirmation mismatch — recommended", description: "The supplier confirms 6 bags instead of 7. Crumbly refuses the mismatch and asks you to approve a safe one-bag top-up." },
+  { id: "owner_rejects", label: "Owner rejects the first offer", description: "You reject Borough Mill as too expensive, so Crumbly replans a qualifying split order." },
+  { id: "new_supplier_wins", label: "New supplier needs approval", description: "A controlled Linkup-fixture scenario where a new supplier wins and purchasing pauses for your approval." },
+];
+
 export default function App() {
   const route = useRoute();
   const { data: cfg } = useApi("/api/config", 15000);
@@ -101,6 +108,7 @@ function DemoMenu({ cfg }: { cfg: any }) { // eslint-disable-line @typescript-es
   const [scenario, setScenario] = useState("happy");
   const [error, setError] = useState("");
   const newSupplier = cfg?.scenario_availability?.new_supplier_wins;
+  const selected = DEMO_SCENARIOS.find((s) => s.id === scenario) ?? DEMO_SCENARIOS[0];
   useEffect(() => { if (cfg?.scenario) setScenario(cfg.scenario); }, [cfg?.scenario]);
   const run = async (label: string, fn: () => Promise<unknown>) => {
     setBusy(label); setError("");
@@ -114,12 +122,13 @@ function DemoMenu({ cfg }: { cfg: any }) { // eslint-disable-line @typescript-es
         <div className="absolute right-0 top-10 z-30 w-72 space-y-3 rounded-2xl border border-line bg-white p-4 text-sm shadow-lg">
           <label className="block text-xs text-muted">Scenario
             <select value={scenario} onChange={(e) => setScenario(e.target.value)} className="mt-1 block w-full rounded-xl border border-line p-2 text-sm">
-              {["happy", "short_confirm", "new_supplier_wins", "owner_rejects"].map((s) => (
-                <option key={s} disabled={s === "new_supplier_wins" && newSupplier?.enabled === false}>
-                  {s === "new_supplier_wins" ? `new_supplier_wins${newSupplier?.enabled === false ? " (controlled fixture only)" : ""}` : s}
+              {DEMO_SCENARIOS.map((s) => (
+                <option key={s.id} value={s.id} disabled={s.id === "new_supplier_wins" && newSupplier?.enabled === false}>
+                  {s.label}{s.id === "new_supplier_wins" && newSupplier?.enabled === false ? " (fixture only)" : ""}
                 </option>))}
             </select>
           </label>
+          <p className="rounded-xl bg-lilac-2 p-2 text-xs text-plum">{selected.description}</p>
           {newSupplier?.enabled === false && <p className="rounded-xl bg-amber p-2 text-xs text-amber-ink">{newSupplier.reason} Restart with <code>LINKUP_MODE=fixture</code> to run it.</p>}
           <button className="w-full rounded-full bg-lilac px-3 py-2 font-medium text-plum" disabled={!!busy}
             onClick={() => run("reset", async () => { await api("/api/demo/reset", { scenario }); window.location.hash = "#/"; })}>
@@ -131,7 +140,7 @@ function DemoMenu({ cfg }: { cfg: any }) { // eslint-disable-line @typescript-es
               window.location.hash = "#/";
               setOpen(false);
             })}>
-            {busy === "start" ? "Starting the agents…" : "▶ Start demo (reset + trigger)"}</button>
+            {busy === "start" ? "Starting the agents…" : `▶ Start ${selected.label}`}</button>
           <button className="w-full rounded-full bg-plum px-3 py-2 font-medium text-white" disabled={!!busy}
             onClick={() => run("send", () => api("/api/demo/send-cancellation", {}))}>
             {busy === "send" ? "Sending…" : "Send the cancellation email"}</button>
