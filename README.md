@@ -105,6 +105,7 @@ resets a scenario and sends the cancellation email.
 
 ## Demo script (≈3 min at `DEMO_TIME_SCALE=60`)
 
+[▶ Watch Crumbly Demo](xdemo/crumbly-demo.mp4)
 1. Run `make reset SCENARIO=happy`, then `make send-cancellation`. The real Millers Supply email arrives, and within
    seconds the home page shows the matched email, **INC-0042** and the metrics strip.
 2. **Understand**: 200 kg needed, 40 kg on hand, **160 kg short**, rounded up to **7 × 25 kg**. Three orders are at risk
