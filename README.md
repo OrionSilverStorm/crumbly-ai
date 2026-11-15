@@ -1,4 +1,4 @@
-# crumbly — *A little less worry.*
+# crumbly ~ *A little less worry.*
 
 **An autonomous purchasing agent for independent wholesale bakeries.** When a supplier cancels a delivery the night
 before a bake, Crumbly reads the email, works out exactly which customer orders are at risk, asks approved suppliers
@@ -6,6 +6,8 @@ for replacements, researches new ones with Linkup, chases missing details, check
 rules, places the order (or asks first), and then checks the supplier's confirmation field by field.
 
 > Imperial AI Hackathon · **Autonomous Agents** track · Databricks and Linkup bounties
+
+**[▶ Watch the demo video](demo/crumbly-demo.mp4)** · [Screenshot overview](docs/overview/)
 
 ![Crumbly incident home page showing a cancelled flour delivery detected from email](docs/screenshots/02-cancellation-detected.png)
 
