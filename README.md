@@ -75,12 +75,23 @@ delivery history computed in SQL, and cost second. A cheap delivery that arrives
 Every step is written to an append-only event log, with its evidence and an MLflow trace id. State is saved after every
 step, so a restart picks up where it left off.
 
-### Ask Crumbly: an assistant that can't spend money
+### Ask Crumbly: chat and voice-powered multilingual assistance
 
-![Help assistant answering "Is tomorrow OK?" with live figures](docs/screenshots/09-help-assistant.png)
+**Live AI Chatbot**
 
-The assistant answers from read-only tools, so it can't invent numbers. It can prepare a decision, but placing orders,
-sending emails and changing rules always need the owner's click. A test enforces this too.
+![Crumbly live chatbot answering questions using real-time business data](docs/screenshots/16-chat1.png)
+
+**Voice-based Multilingual Assistant**
+
+![Crumbly voice assistant supporting natural, multilingual conversations](docs/screenshots/17-chat2.png)
+
+Crumbly offers two ways for owners to interact with their assistant:
+
+- **Live chatbot:** Ask questions in plain English and get answers grounded in live business data, including inventory, deliveries, supplier quotes and affected orders.
+- **Voice assistant:** Have natural, hands-free conversations in multiple languages. Simply speak to Crumbly in your preferred language and receive spoken answers.
+
+Both experiences use read-only tools, so the assistant can explain information and prepare decisions but cannot spend money, place orders, send emails or change business rules. Consequential actions always require the owner's explicit approval.
+
 
 ## Four scenarios, four kinds of autonomy
 
