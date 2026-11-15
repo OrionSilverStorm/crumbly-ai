@@ -11,7 +11,7 @@ rules, places the order (or asks first), and then checks the supplier's confirma
 
 ![Crumbly incident home page showing a cancelled flour delivery detected from email](docs/screenshots/02-cancellation-detected.png)
 
-## For judges: the 60-second version
+## The 60-second version
 
 | Judging criterion | Where to look |
 |---|---|
