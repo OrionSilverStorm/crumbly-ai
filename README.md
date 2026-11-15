@@ -15,7 +15,7 @@ rules, places the order (or asks first), and then checks the supplier's confirma
 
 <!-- Add the YouTube link below, e.g. [![Crumbly demo video](https://img.youtube.com/vi/VIDEO_ID/maxresdefault.jpg)](https://www.youtube.com/watch?v=VIDEO_ID) -->
 
-▶ **YouTube:** _link coming soon_
+▶ **YouTube:** [Watch the Crumbly demo](https://www.youtube.com/watch?v=LurEHHeilNk)
 
 ## The 60-second version
 
