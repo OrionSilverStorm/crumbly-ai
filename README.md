@@ -67,7 +67,7 @@ flowchart LR
 ```bash
 make install        # Python venv + frontend packages
 make dev            # builds the UI and serves http://localhost:8000
-make test           # 17 tests, fully offline
+make test           # 21 tests, fully offline
 ```
 
 Defaults are offline:
