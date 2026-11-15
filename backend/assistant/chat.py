@@ -30,6 +30,7 @@ def chat(text: str, page: str = "home", incident_id: str | None = None, owner_id
     messages = [{"role": "system", "content": SYSTEM.format(page=page, incident=incident_id or "none")},
                 *[{"role": h["role"], "content": h["content"]} for h in history], {"role": "user", "content": text}]
     ctx, cards = {"incident_id": incident_id, "page": page}, []
+    called_tools: list[str] = []
     reply = ""
     for _ in range(MAX_STEPS):
         out = llm.complete(messages, tools=tools.SPECS)
@@ -39,13 +40,21 @@ def chat(text: str, page: str = "home", incident_id: str | None = None, owner_id
         messages.append({"role": "assistant", "content": out["content"] or "", "tool_calls": [
             {"id": c["id"], "type": "function", "function": {"name": c["name"], "arguments": c["arguments"]}} for c in out["tool_calls"]]})
         for c in out["tool_calls"]:
+            called_tools.append(c["name"])
             result, card = tools.run_json(c["name"], c["arguments"], ctx)
             if card:
                 cards.append(card)
             messages.append({"role": "tool", "tool_call_id": c["id"], "name": c["name"], "content": result})
     reply = reply or "Sorry, I'm not sure about that one. I can show you the right screen instead."
     if not cards:
-        cards.append({"type": "link", "label": "Show me the screen", "href": tools.SCREENS["home"]})
+        target = {
+            "get_incident_summary": "summary", "get_affected_orders": "understand", "get_quotes": "decide",
+            "get_pending_decision": "decision", "get_rules": "rules", "get_metrics": "home",
+        }.get(called_tools[-1] if called_tools else "", "summary" if incident_id else "home")
+        href = tools.SCREENS[target].format(id=incident_id) if "{id}" in tools.SCREENS[target] and incident_id else tools.SCREENS["home"]
+        label = {"rules": "Open purchasing rules", "decide": "See the offer comparison", "understand": "See affected orders",
+                 "decision": "Open the decision", "summary": "Open incident summary"}.get(target, "Open dashboard")
+        cards.append({"type": "link", "label": label, "href": href})
     q("INSERT INTO assistant_messages (owner_id, role, content) VALUES (%s, 'user', %s)", [owner, text])
     q("INSERT INTO assistant_messages (owner_id, role, content, card) VALUES (%s, 'assistant', %s, %s)", [owner, reply, cards])
     return {"reply": reply, "cards": cards}
@@ -57,12 +66,15 @@ INTENTS = [  # (pattern on the owner's words, tool, args)
     (r"too expensive|too dear|costs? too much", "prepare_feedback", {"reason": "too_expensive"}),
     (r"don'?t trust|do not trust", "prepare_feedback", {"reason": "dont_trust_supplier"}),
     (r"later is fine|can wait", "prepare_feedback", {"reason": "later_is_fine"}),
-    (r"which option|should i pick|recommend|what happens if i do nothing|order it|approve", "get_pending_decision", {}),
+    (r"\b(can|could|will) you\b.*\b(order|buy|email|send|change)|\bplace (an? )?order\b", "get_capabilities", {}),
+    (r"which option|should i pick|recommend|what happens if i do nothing|\border it\b|\bapprove\b", "get_pending_decision", {}),
     (r"\bwhy\b|picked|choose|chose", "get_quotes", {}),
-    (r"alder|juniper|corner shop|customer|orders?\b", "get_affected_orders", {}),
+    (r"\b(cost|price|charge|spend|paid|pay|cheap|expensive)\b|how much", "get_quotes", {}),
+    (r"alder|juniper|corner shop|customer|pastr|loaves|affected orders", "get_affected_orders", {}),
     (r"limit|rule", "get_rules", {}),
     (r"how .*doing|metric|so far", "get_metrics", {}),
     (r"what does|what is|mean", "explain_term", None),
+    (r"what happened|what'?s going on|status|what should i do|what do i do|is .* ok|tomorrow", "get_incident_summary", {}),
     (r".*", "get_incident_summary", {}),
 ]
 
@@ -104,6 +116,9 @@ def _phrase(r: dict, user: str) -> str:
         return f"There's one thing waiting for you: {d['title']}\n\nI'd pick “{rec['label']}”. It passes all your rules.{extra}\n\nPress the button below if you're happy."
     if "get_pending_decision" in r:
         return "Nothing is waiting for you right now. Crumbly will ask if anything falls outside your rules.\n\nYou don't need to do anything."
+    if "get_capabilities" in r:
+        return ("I can explain the live incident, compare the offers and prepare a decision for you. I cannot place an order, "
+                "send an email or change a rule from this chat.\n\nIf action is needed, I’ll show a confirmation button so you stay in control.")
     if "get_incident_summary" in r:
         s = r["get_incident_summary"]
         if s.get("error"):
@@ -111,6 +126,12 @@ def _phrase(r: dict, user: str) -> str:
         st, sh = s["stock"], s["shortage"] or {}
         slots = s.get("coverage_now") or []
         ok = sum(x["covered"] for x in slots)
+        if re.search(r"what happened|going on", user, re.I):
+            outcome = (f"It is sorted now: {st['on_order_kg']:g} kg is arriving at {st['on_order_arrival'][11:16]}, "
+                       f"and all {len(slots)} bakes are covered.") if slots and ok == len(slots) else "Crumbly is asking suppliers for a replacement now."
+            return (f"{s.get('original_supplier') or 'Your supplier'} cancelled tomorrow’s {s['ingredient']} delivery. "
+                    f"That left you {sh.get('shortage_kg', 0):g} kg short for {sh.get('needed_kg', 0):g} kg of baking.\n\n{outcome}\n\n"
+                    "Next step: open the incident summary if you want the full trail.")
         if s["status"] in ("resolved", "resolved_partial") or (slots and ok == len(slots)):
             return (f"Yes, tomorrow looks fine. {st['on_order_kg']:g} kg of {s['ingredient']} is on its way"
                     f"{', arriving ' + st['on_order_arrival'][11:16] if st.get('on_order_arrival') else ''}. "
@@ -128,7 +149,9 @@ def _phrase(r: dict, user: str) -> str:
             return "No offer passes all your rules yet. " + "; ".join(f"{p['suppliers'][0]}: {', '.join(p['reasons']).lower()}" for p in qd["disqualified"]) + ".\n\nWe'll keep looking."
         best = qd["qualifying"][0]
         others = "; ".join(f"{p['suppliers'][0]} was {', '.join(p['reasons']).lower()}" for p in qd["disqualified"])
-        return (f"We picked {' + '.join(best['suppliers'])} at £{float(best['total']):.0f}. We put reliability first, then cost — a cheap order that turns up late doesn't help."
+        lead = "The replacement costs" if re.search(r"cost|price|charge|spend|paid|pay|how much", user, re.I) else "We picked"
+        subject = f" £{float(best['total']):.0f} from {' + '.join(best['suppliers'])}" if lead.startswith("The") else f" {' + '.join(best['suppliers'])} at £{float(best['total']):.0f}"
+        return (f"{lead}{subject}. We put reliability first, then cost — a cheap order that turns up late doesn't help."
                 + (f"\n\nThe others: {others}." if others else "") + "\n\nNext step: nothing, unless you'd rather not use them.")
     if "get_rules" in r:
         x = r["get_rules"]

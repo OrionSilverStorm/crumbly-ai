@@ -99,8 +99,12 @@ function DemoMenu({ cfg }: { cfg: any }) { // eslint-disable-line @typescript-es
   const [openMenu, setOpen] = useState(false);
   const [busy, setBusy] = useState("");
   const [scenario, setScenario] = useState("happy");
+  const [error, setError] = useState("");
   useEffect(() => { if (cfg?.scenario) setScenario(cfg.scenario); }, [cfg?.scenario]);
-  const run = async (label: string, fn: () => Promise<unknown>) => { setBusy(label); try { await fn(); } finally { setBusy(""); } };
+  const run = async (label: string, fn: () => Promise<unknown>) => {
+    setBusy(label); setError("");
+    try { await fn(); } catch (e) { setError(String(e)); } finally { setBusy(""); }
+  };
   return (
     <div className="relative flex items-center gap-2">
       {cfg && cfg.time_scale > 1 && <span className="rounded-full bg-amber px-3 py-1 text-xs text-amber-ink" title="Timers run faster for the demo">{cfg.time_scale}× demo time</span>}
@@ -115,9 +119,18 @@ function DemoMenu({ cfg }: { cfg: any }) { // eslint-disable-line @typescript-es
           <button className="w-full rounded-full bg-lilac px-3 py-2 font-medium text-plum" disabled={!!busy}
             onClick={() => run("reset", async () => { await api("/api/demo/reset", { scenario }); window.location.hash = "#/"; })}>
             {busy === "reset" ? "Resetting…" : "Reset demo data"}</button>
+          <button className="w-full rounded-full bg-plum px-3 py-2 font-semibold text-white" disabled={!!busy}
+            onClick={() => run("start", async () => {
+              await api("/api/demo/reset", { scenario });
+              await api("/api/demo/send-cancellation", {});
+              window.location.hash = "#/";
+              setOpen(false);
+            })}>
+            {busy === "start" ? "Starting the agents…" : "▶ Start demo (reset + trigger)"}</button>
           <button className="w-full rounded-full bg-plum px-3 py-2 font-medium text-white" disabled={!!busy}
             onClick={() => run("send", () => api("/api/demo/send-cancellation", {}))}>
             {busy === "send" ? "Sending…" : "Send the cancellation email"}</button>
+          {error && <p className="rounded-xl bg-rose p-2 text-xs text-rose-ink">Couldn’t start the demo. Nothing was changed. {error}</p>}
           <p className="text-xs text-muted">Modes: {cfg && Object.entries(cfg.modes).filter(([k]) => k !== "tracing").map(([k, v]) => `${k} ${v}`).join(" · ")}</p>
         </div>
       )}

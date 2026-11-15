@@ -30,6 +30,26 @@ def test_assistant_answers_from_tools(scenario):
     assert "Yes" in r["reply"] and "175 kg" in r["reply"] and "05:00" in r["reply"] and "3 of 3" in r["reply"]
 
 
+def test_assistant_routes_common_owner_questions(scenario):
+    drive = scenario("happy")
+    trigger()
+    assert drive(lambda: incident() is not None and incident()["status"] == "resolved", timeout=150)
+    iid = incident()["id"]
+
+    happened = chat.chat("What happened?", incident_id=iid)
+    assert "cancelled" in happened["reply"] and "160 kg short" in happened["reply"]
+    assert happened["cards"][0]["href"].endswith("/summary")
+
+    cost = chat.chat("How much will this cost?", incident_id=iid)
+    assert "£165" in cost["reply"] and cost["cards"][0]["href"].endswith("/decide")
+
+    safety = chat.chat("Can you order more flour?", incident_id=iid)
+    assert "cannot place an order" in safety["reply"] and "confirmation" in safety["reply"]
+
+    term = chat.chat("What does reliability mean?", incident_id=iid)
+    assert "arrives on time" in term["reply"]
+
+
 def test_assistant_too_expensive_prepares_card_and_never_orders(scenario):
     drive = scenario("owner_rejects")
     trigger()

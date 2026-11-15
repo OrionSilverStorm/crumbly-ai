@@ -157,7 +157,7 @@ notebooks/ 01_setup_uc.py · 02_pipeline_demo.py · 03_trace_analysis.sql
 ## Status
 
 **Verified locally (offline modes):**
-- **Tests**: all 17 pass (`make test`).
+- **Tests**: all 20 pass (`make test`).
   - The acceptance numbers: a 160 kg shortage; +175 kg at 05:00 covers every slot, while at 07:00 it covers none; 96% and 91% reliability, computed in SQL.
   - Pack rounding and the 7 execution checks.
   - Confirmation matching and PO idempotency.
@@ -169,9 +169,13 @@ notebooks/ 01_setup_uc.py · 02_pipeline_demo.py · 03_trace_analysis.sql
   - `short_confirm` produces a mismatch decision, and the top-up resolves it.
 - **UI**: all screens were rendered in headless Edge with no console errors.
 
+**Verified against real services:**
+- Live Linkup discovery and source-page verification, with customer and recipe data excluded from every query.
+- Databricks Free Edition SQL warehouse, `crumbly.bakery` catalog/schema, Delta tables, UC table functions and seeded demo data.
+- Live UC acceptance check: 200 kg needed − 40 kg on hand = 160 kg short = 7 × 25 kg bags.
+
 **Written to the current docs but not yet run against real services:**
 - Lakebase OAuth credentials.
-- The Databricks SQL warehouse client and UC function DDL.
 - `ai_query` parsing.
 - The serving-endpoint LLM.
 - Gmail IMAP/SMTP.

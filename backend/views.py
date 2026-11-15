@@ -27,7 +27,7 @@ def config() -> dict:
     return {"scenario": store.demo_state("scenario", settings.scenario), "time_scale": settings.time_scale,
             "modes": {"db": settings.db_mode, "warehouse": settings.warehouse_mode, "llm": settings.llm_provider,
                       "email": settings.email_mode, "linkup": settings.linkup_mode, "tracing": tracing.status()},
-            "footer": "Real email & tool calls · fictional bakery data · scripted supplier replies",
+            "footer": "Live Linkup research · deterministic demo inbox · fictional bakery data",
             "rules": rules_summary()}
 
 

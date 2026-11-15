@@ -25,6 +25,7 @@ SPECS = [
     _fn("get_pending_decision", "Any decision waiting for the owner, with the options and which one is recommended."),
     _fn("get_rules", "The owner's purchasing rules (limit, auto-ordering, delivery window, timers)."),
     _fn("get_metrics", "How Crumbly has been doing (time to recover, orders protected, cost)."),
+    _fn("get_capabilities", "What the help assistant can and cannot do, including its safety boundary."),
     _fn("explain_term", "Explain a word used in the app in plain English.", {"term": {"type": "string"}}, ["term"]),
     _fn("navigate_to", "Offer a link to a screen.", {"screen": {"type": "string", "enum": list(SCREENS)}}, ["screen"]),
     _fn("prepare_feedback", "Prepare (NOT send) a 'Not this one' card the owner must confirm.",
@@ -52,6 +53,12 @@ def run(name: str, args: dict, ctx: dict) -> tuple[dict, dict | None]:
         return views.rules_summary(), None
     if name == "get_metrics":
         return views.metrics(), None
+    if name == "get_capabilities":
+        return {
+            "can": ["explain the live incident", "compare offers", "prepare a decision for the owner"],
+            "cannot": ["place an order from chat", "send an email from chat", "change a purchasing rule from chat"],
+            "safety": "Any action needs an explicit owner click on a confirmation card.",
+        }, None
     if name == "navigate_to":
         screen = args.get("screen", "home")
         return {"ok": True}, {"type": "link", "label": "Show me the screen", "href": SCREENS.get(screen, "#/").format(id=iid)}

@@ -13,6 +13,10 @@ TERMS = {
     "confirmation": "The supplier's reply agreeing to an order. We check every detail against what was agreed before accepting it.",
     "linkup": "A web research service Crumbly uses to find and double-check new suppliers. It only ever searches for the ingredient and your area, never your customers.",
     "incident": "One problem with a delivery, from the moment we spot it until it's sorted.",
+    "reliability": "How often a supplier arrives on time and brings the full amount. Crumbly checks this before price, because cheap flour that arrives late cannot protect a bake.",
+    "coverage": "Whether the flour available by a bake time is enough for everything due by then. Flour arriving too late does not count.",
+    "agent": "A small part of Crumbly that handles one job, such as checking stock, contacting suppliers or checking an order confirmation.",
+    "autonomous": "Able to carry out the routine steps by itself, while still stopping for your approval whenever your rules require it.",
 }
 
 

@@ -8,8 +8,8 @@ type Msg = { role: "user" | "assistant"; text: string; cards?: J[]; done?: boole
 /** Suggested questions change with the screen. */
 function chips(route: string[]): string[] {
   const tab = route[0] === "incident" ? route[2] ?? "" : route[0] ?? "";
-  if (["decide", "needs-you"].includes(tab)) return ["Which option should I pick?", "What happens if I do nothing?", "That's too expensive"];
-  if (route[0] === "incident") return ["Is tomorrow OK?", "Will Alder Hotel get their pastries?", "Why did you pick this supplier?"];
+  if (["decide", "needs-you"].includes(tab)) return ["Which option should I pick?", "How much will it cost?", "What happens if I do nothing?"];
+  if (route[0] === "incident") return ["What happened?", "Is tomorrow OK?", "Why did you pick this supplier?"];
   if (tab === "rules") return ["How do I change my spending limit?", "What does auto-order mean?"];
   return ["What's going on with my flour?", "Is tomorrow OK?", "What does 'on order' mean?"];
 }
@@ -19,8 +19,9 @@ const Recognition = (window as J).SpeechRecognition || (window as J).webkitSpeec
 const speak = (text: string) => { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = "en-GB"; speechSynthesis.speak(u); };
 
 export default function Assistant({ route }: { route: string[] }) {
+  const starter: Msg = { role: "assistant", text: "Hello! I use the live incident data to explain what’s happening. I can prepare a decision too, but I will never place an order without your confirmation." };
   const [open, setOpen] = useState(false);
-  const [msgs, setMsgs] = useState<Msg[]>([{ role: "assistant", text: "Hello! I can explain what’s happening and help you decide. Ask me anything, or tap a question below." }]);
+  const [msgs, setMsgs] = useState<Msg[]>([starter]);
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [listening, setListening] = useState(false);
@@ -51,12 +52,16 @@ export default function Assistant({ route }: { route: string[] }) {
   /** Owner pressed a confirmation button: only now does anything happen, through the usual endpoints. */
   const confirm = async (i: number, card: J, yes: boolean) => {
     let reply = "No problem, I haven’t changed anything.";
-    if (yes && card.type === "confirm_feedback") {
-      await api("/api/feedback", { incident_id: card.incident_id, reason: card.reason, note: card.note, quote_id: card.quote_id, supplier: card.supplier });
-      reply = "Done. Crumbly is looking again now. I’ll show you the new option on the decision screen.";
-    } else if (yes && card.type === "confirm_decision") {
-      const r = await api(`/api/decisions/${card.decision_id}`, { option: card.option_id });
-      reply = r.ok ? "Done. That’s been carried out within your rules." : `I couldn’t do that: ${r.reason}`;
+    try {
+      if (yes && card.type === "confirm_feedback") {
+        await api("/api/feedback", { incident_id: card.incident_id, reason: card.reason, note: card.note, quote_id: card.quote_id, supplier: card.supplier });
+        reply = "Done. Crumbly is looking again now. I’ll show you the new option on the decision screen.";
+      } else if (yes && card.type === "confirm_decision") {
+        const r = await api(`/api/decisions/${card.decision_id}`, { option: card.option_id });
+        reply = r.ok ? "Done. That’s been carried out within your rules." : `I couldn’t do that: ${r.reason}`;
+      }
+    } catch {
+      reply = "I couldn’t carry that out just now. Nothing was changed. Please use the decision screen instead.";
     }
     setMsgs((m) => [...m.map((x, n) => (n === i ? { ...x, done: true } : x)), { role: "assistant", text: reply,
       cards: incidentId ? [{ type: "link", label: "Show me the screen", href: `#/incident/${incidentId}` }] : [] }]);
@@ -66,13 +71,16 @@ export default function Assistant({ route }: { route: string[] }) {
     <>
       {!open && (
         <button onClick={() => setOpen(true)} className="fixed bottom-6 right-6 z-40 flex min-h-14 items-center gap-2 rounded-full bg-plum px-6 text-lg font-semibold text-white shadow-lg hover:bg-plum-dark">
-          <span aria-hidden="true">💬</span> Ask for help
+          <span aria-hidden="true">💬</span> Ask Crumbly <span className="rounded-full bg-white/20 px-2 py-0.5 text-xs">Live</span>
         </button>)}
       {open && (
         <aside role="dialog" aria-label="Help assistant" className="fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col border-l border-line bg-white text-lg shadow-2xl">
           <header className="flex items-center justify-between border-b border-line p-4">
-            <div><div className="font-display text-xl font-bold">Ask Crumbly</div><div className="text-sm text-muted">Plain answers about your bakery</div></div>
-            <button onClick={() => setOpen(false)} className="min-h-12 min-w-12 rounded-full bg-lilac text-plum" aria-label="Close help">✕</button>
+            <div><div className="font-display text-xl font-bold">Ask Crumbly</div><div className="text-sm text-muted"><span className="text-sage-ink">●</span> Live bakery data · actions need your click</div></div>
+            <div className="flex items-center gap-1">
+              <button onClick={() => setMsgs([starter])} className="min-h-10 px-2 text-sm text-plum underline">Clear</button>
+              <button onClick={() => setOpen(false)} className="min-h-12 min-w-12 rounded-full bg-lilac text-plum" aria-label="Close help">✕</button>
+            </div>
           </header>
           <div className="flex-1 space-y-4 overflow-y-auto p-4" aria-live="polite">
             {msgs.map((m, i) => (
@@ -91,7 +99,7 @@ export default function Assistant({ route }: { route: string[] }) {
             {busy && <p className="text-muted">Thinking…</p>}
             <div ref={end} />
           </div>
-          <div className="border-t border-line p-4">
+          <div className="border-t border-line p-4" aria-busy={busy}>
             <div className="mb-3 flex flex-wrap gap-2">{chips(route).map((c) => (
               <button key={c} onClick={() => ask(c)} className="min-h-12 rounded-full bg-lilac px-4 text-base text-plum hover:bg-lilac-2">{c}</button>))}</div>
             <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); ask(text); }}>
